@@ -14,12 +14,13 @@ if (!fs.existsSync('data')) {
   shell.exit(0);
 }
 
-function findModules(dirname: string): string[] {
+function findModules(dirname: string, excludes: string[] = []): string[] {
   return fs
     .readdirSync(dirname, { withFileTypes: true })
     .filter((dirent) => dirent.isDirectory())
     .map((dirent) => dirent.name)
     .filter((name) => !name.startsWith('__'))
+    .filter((name) => !excludes.includes(name))
     .sort();
 }
 
@@ -108,7 +109,12 @@ async function generateData(): Promise<void> {
     await generateData();
 
     // datasources
-    await generate({ path: 'datasource', types: ['DatasourceApi'] });
+    const datasourceExcludes = ['cdnjs', 'clojure'];
+    await generate({
+      path: 'datasource',
+      types: ['DatasourceApi'],
+      excludes: datasourceExcludes,
+    });
 
     // managers
     await generate({ path: 'manager', types: ['ManagerApi'] });
